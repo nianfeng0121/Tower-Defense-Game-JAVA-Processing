@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Path.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">hw</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">Path.java</span></div><h1>Path.java</h1><pre class="source lang-java linenums">package WizardTD;
+
+import processing.core.PImage;
+
+/**
+ * The Path class represents a path tile in the game.
+ */
+public class Path extends WizOrPath {
+    // The type of path (straight, corner, T-junction, crossroad)
+    private int pathType;
+    // The number of 90-degree rotations applied to the path sprite.
+    private int rotates;
+    // Default sprite path which will be overridden based on the path type.
+    private static final String spritePathToBeOverriden = &quot;src/main/resources/WizardTD/path0.png&quot;;
+
+    /**
+     * Constructor for initializing a new Path object.
+     * @param x The x-coordinate of the path tile.
+     * @param y The y-coordinate of the path tile.
+     * @param map The map the path tile belongs to.
+     */
+    public Path(int x, int y, Map map) {
+<span class="fc" id="L23">        super(x, y, map, Path.spritePathToBeOverriden);</span>
+<span class="fc" id="L24">    }</span>
+
+    /**
+     * Updates the path type and rotates the sprite accordingly.
+     */
+    public void updatePath() {
+<span class="fc" id="L30">        this.pathTypeRotate();</span>
+<span class="fc" id="L31">        this.createImage();</span>
+<span class="fc" id="L32">    }</span>
+
+    /**
+     * Determines the path type and rotation based on adjacent tiles.
+     */
+    public void pathTypeRotate() {
+        // Booleans to track whether there is a path in each direction.
+<span class="fc" id="L39">        boolean left = false, right = false, up = false, down = false;</span>
+        
+        // Check for adjacent non-terminal paths.
+<span class="fc" id="L42">        boolean[] directionsThatArentTerminal = this.findDirectionsThatExist();</span>
+
+        // Determine the directions where paths are present.
+<span class="fc bfc" id="L45" title="All 4 branches covered.">        right = !directionsThatArentTerminal[0] || this.adj.get(Direction.RIGHT) instanceof WizOrPath;</span>
+<span class="fc bfc" id="L46" title="All 4 branches covered.">        up    = !directionsThatArentTerminal[1] || this.adj.get(Direction.UP)    instanceof WizOrPath;</span>
+<span class="pc bpc" id="L47" title="1 of 4 branches missed.">        left  = !directionsThatArentTerminal[2] || this.adj.get(Direction.LEFT)  instanceof WizOrPath;</span>
+<span class="fc bfc" id="L48" title="All 4 branches covered.">        down  = !directionsThatArentTerminal[3] || this.adj.get(Direction.DOWN)  instanceof WizOrPath;</span>
+
+        // Determine path type and rotation based on adjacent paths.
+<span class="fc bfc" id="L51" title="All 8 branches covered.">        if (left &amp;&amp; right &amp;&amp; up &amp;&amp; down) {</span>
+<span class="fc" id="L52">            this.pathType = 3; // Crossroad</span>
+<span class="fc" id="L53">            this.rotates = 0;</span>
+<span class="fc bfc" id="L54" title="All 6 branches covered.">        } else if (left &amp;&amp; right &amp;&amp; up) {</span>
+<span class="fc" id="L55">            this.pathType = 2; // T-junction</span>
+<span class="fc" id="L56">            this.rotates = 2;</span>
+<span class="pc bpc" id="L57" title="1 of 6 branches missed.">        } else if (left &amp;&amp; right &amp;&amp; down) {</span>
+<span class="nc" id="L58">            this.pathType = 2; // T-junction</span>
+<span class="nc" id="L59">            this.rotates = 0;</span>
+<span class="fc bfc" id="L60" title="All 6 branches covered.">        } else if (left &amp;&amp; up &amp;&amp; down) {</span>
+<span class="fc" id="L61">            this.pathType = 2; // T-junction</span>
+<span class="fc" id="L62">            this.rotates = 3;</span>
+<span class="pc bpc" id="L63" title="3 of 6 branches missed.">        } else if (right &amp;&amp; up &amp;&amp; down) {</span>
+<span class="nc" id="L64">            this.pathType = 2; // T-junction</span>
+<span class="nc" id="L65">            this.rotates = 1;</span>
+<span class="fc bfc" id="L66" title="All 4 branches covered.">        } else if (left &amp;&amp; right) {</span>
+<span class="fc" id="L67">            this.pathType = 0; // Straight path</span>
+<span class="fc" id="L68">            this.rotates = 0;</span>
+<span class="fc bfc" id="L69" title="All 4 branches covered.">        } else if (up &amp;&amp; down) {</span>
+<span class="fc" id="L70">            this.pathType = 0; // Straight path</span>
+<span class="fc" id="L71">            this.rotates = 1;</span>
+<span class="fc bfc" id="L72" title="All 4 branches covered.">        } else if (left &amp;&amp; up) {</span>
+<span class="fc" id="L73">            this.pathType = 1; // Corner</span>
+<span class="fc" id="L74">            this.rotates = 3;</span>
+<span class="pc bpc" id="L75" title="1 of 4 branches missed.">        } else if (left &amp;&amp; down) {</span>
+<span class="fc" id="L76">            this.pathType = 1; // Corner</span>
+<span class="fc" id="L77">            this.rotates = 0;</span>
+<span class="pc bpc" id="L78" title="2 of 4 branches missed.">        } else if (right &amp;&amp; up) {</span>
+<span class="nc" id="L79">            this.pathType = 1; // Corner</span>
+<span class="nc" id="L80">            this.rotates = 2;</span>
+<span class="pc bpc" id="L81" title="2 of 4 branches missed.">        } else if (right &amp;&amp; down) {</span>
+<span class="fc" id="L82">            this.pathType = 1; // Corner</span>
+<span class="fc" id="L83">            this.rotates = 1;</span>
+<span class="nc bnc" id="L84" title="All 4 branches missed.">        } else if (left || right) {</span>
+<span class="nc" id="L85">            this.pathType = 0; // Straight path</span>
+<span class="nc" id="L86">            this.rotates = 0;</span>
+<span class="nc bnc" id="L87" title="All 4 branches missed.">        } else if (up || down) {</span>
+<span class="nc" id="L88">            this.pathType = 0; // Straight path</span>
+<span class="nc" id="L89">            this.rotates = 1;</span>
+        } else {
+<span class="nc" id="L91">            System.out.println(&quot;Lone path: &quot; + this);</span>
+<span class="nc" id="L92">            this.pathType = 3; // Crossroad</span>
+<span class="nc" id="L93">            this.rotates = 0;</span>
+        }
+<span class="fc" id="L95">    }</span>
+
+    /**
+     * Creates and sets the sprite image based on the path type and rotation.
+     */
+    public void createImage() {
+        PImage noRotate;
+<span class="fc" id="L102">        noRotate = this.map.getApp().loadImage(&quot;src/main/resources/WizardTD/path&quot; + this.pathType + &quot;.png&quot;); </span>
+<span class="fc" id="L103">        this.sprite = this.map.getApp().rotateImageByDegrees(noRotate, this.rotates * -90);</span>
+<span class="fc" id="L104">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

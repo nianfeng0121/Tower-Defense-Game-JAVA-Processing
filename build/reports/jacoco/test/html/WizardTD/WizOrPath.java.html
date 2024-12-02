@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WizOrPath.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">hw</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">WizOrPath.java</span></div><h1>WizOrPath.java</h1><pre class="source lang-java linenums">package WizardTD;
+
+import java.util.HashMap;
+
+/**
+ * WizOrPath is an abstract class that represents either a wizard tower or a path on the game map.
+ * It extends the Tile class, adding additional properties and methods specific to wizard towers and paths.
+ */
+abstract class WizOrPath extends Tile {
+    // Constant representing the size of a cell on the game map.
+    public static final int CELLSIZE = App.CELLSIZE;
+
+    // Distance from the nearest wizard tower, used for game mechanics.
+<span class="fc" id="L14">    protected int wizDist = 0;</span>
+    
+    // A map representing adjacent tiles in each direction.
+<span class="fc" id="L17">    protected HashMap&lt;Direction, Tile&gt; adj = new HashMap&lt;Direction, Tile&gt;();</span>
+    
+    // The optimal direction to move towards, used for pathfinding.
+    protected Direction optimal;
+    
+    // An array representing terminal directions (edges of the map).
+<span class="fc" id="L23">    protected Direction[] termArray = new Direction[2];</span>
+
+    /**
+     * Constructor for the WizOrPath class.
+     * @param x The x-coordinate of the tile on the map.
+     * @param y The y-coordinate of the tile on the map.
+     * @param map A reference to the Map object.
+     * @param spritePath The file path to the sprite image for the tile.
+     */
+    public WizOrPath(int x, int y, Map map, String spritePath) {
+        // Call to the superclass (Tile) constructor.
+<span class="fc" id="L34">        super(x, y, map, spritePath);</span>
+<span class="fc" id="L35">    }</span>
+
+    /**
+     * Get the terminal directions of this tile.
+     * @return An array of Direction representing the terminal directions.
+     */
+    public Direction[] getTerminals() {
+<span class="fc" id="L42">        return this.termArray;</span>
+    }
+
+    /**
+     * Assign properties to the tile based on its position and adjacent tiles.
+     */
+    public void assignProperties() {
+<span class="fc" id="L49">        this.termArray = this.findTerminality();</span>
+<span class="fc" id="L50">        this.adj = this.buildAdj();</span>
+<span class="fc" id="L51">    }</span>
+
+    /**
+     * Find terminal directions based on the tile's position.
+     * @return An array of Direction representing the terminal directions.
+     */
+    public Direction[] findTerminality() {
+<span class="fc" id="L58">        Direction[] termArray = new Direction[2];</span>
+<span class="fc" id="L59">        int index = 0;</span>
+
+        // Check if the tile is at the edge of the map and assign terminal directions accordingly.
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        if (this.x == 19) {</span>
+<span class="fc" id="L63">            termArray[index] = Direction.RIGHT;</span>
+<span class="fc" id="L64">            index++;</span>
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        } else if (this.x == 0) {</span>
+<span class="nc" id="L66">            termArray[index] = Direction.LEFT;</span>
+<span class="nc" id="L67">            index++;</span>
+        }
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (this.y == 0) {</span>
+<span class="fc" id="L70">            termArray[index] = Direction.UP;</span>
+<span class="fc" id="L71">            index++;</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        } else if (this.y == 19) {</span>
+<span class="fc" id="L73">            termArray[index] = Direction.DOWN;</span>
+<span class="fc" id="L74">            index++;</span>
+        }
+        
+        // Fill remaining terminal directions with NONE.
+<span class="fc bfc" id="L78" title="All 2 branches covered.">        for(int i = index; i &lt; 2; i++) {</span>
+<span class="fc" id="L79">            termArray[i] = Direction.NONE;</span>
+        }
+
+<span class="fc" id="L82">        return termArray;</span>
+    }
+
+    /**
+     * Find directions that exist based on the tile's terminal directions.
+     * @return An array of boolean values representing the existence of directions.
+     */
+    public boolean[] findDirectionsThatExist() {
+<span class="fc" id="L90">        boolean[] directionsThatExist = new boolean[4];</span>
+
+        // Initialize all directions to exist.
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        for(int i = 0; i &lt; 4; i++) {</span>
+<span class="fc" id="L94">            directionsThatExist[i] = true;</span>
+        }
+
+        // Set directions that are terminal to not exist.
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        for(Direction dir: this.termArray) {</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">            if (dir == Direction.RIGHT) {</span>
+<span class="fc" id="L100">                directionsThatExist[0] = false;</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">            } else if (dir == Direction.UP) {</span>
+<span class="fc" id="L102">                directionsThatExist[1] = false;</span>
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">            } else if (dir == Direction.LEFT) {</span>
+<span class="nc" id="L104">                directionsThatExist[2] = false;</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">            } else if (dir == Direction.DOWN) {</span>
+<span class="fc" id="L106">                directionsThatExist[3] = false;</span>
+            }
+        }
+<span class="fc" id="L109">        return directionsThatExist;</span>
+    }
+
+    /**
+     * Build a map of adjacent tiles in each direction.
+     * @return A HashMap of Direction to Tile representing adjacent tiles.
+     */
+    public HashMap&lt;Direction, Tile&gt; buildAdj() {
+<span class="fc" id="L117">        HashMap&lt;Direction, Tile&gt; adj = new HashMap&lt;Direction, Tile&gt;();</span>
+
+<span class="fc" id="L119">        boolean[] directionsThatExist = this.findDirectionsThatExist();</span>
+        
+        // Set adjacent tiles based on the existence of directions.
+<span class="fc bfc" id="L122" title="All 2 branches covered.">        if (directionsThatExist[0]) {</span>
+<span class="fc" id="L123">            adj.put(Direction.RIGHT, this.map.getLand()[this.x + 1][this.y]);</span>
+        } else {
+<span class="fc" id="L125">            adj.put(Direction.RIGHT, null);</span>
+        }
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        if (directionsThatExist[1]) {</span>
+<span class="fc" id="L128">            adj.put(Direction.UP, this.map.getLand()[this.x][this.y - 1]);</span>
+        } else {
+<span class="fc" id="L130">            adj.put(Direction.UP, null);</span>
+        }
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">        if (directionsThatExist[2]) {</span>
+<span class="fc" id="L133">            adj.put(Direction.LEFT, this.map.getLand()[this.x - 1][this.y]);</span>
+        } else {
+<span class="nc" id="L135">            adj.put(Direction.LEFT, null);</span>
+        }
+<span class="fc bfc" id="L137" title="All 2 branches covered.">        if (directionsThatExist[3]) {</span>
+<span class="fc" id="L138">            adj.put(Direction.DOWN, this.map.getLand()[this.x][this.y + 1]);</span>
+        } else {
+<span class="fc" id="L140">            adj.put(Direction.DOWN, null);</span>
+        }
+        
+<span class="fc" id="L143">        return adj;</span>
+    }
+
+    /**
+     * Determine the wizard distances for adjacent path tiles.
+     */
+    public void determineWizDists() {
+<span class="fc bfc" id="L150" title="All 2 branches covered.">        for(Tile i: this.adj.values()) {</span>
+<span class="fc bfc" id="L151" title="All 6 branches covered.">            if (</span>
+                i instanceof Path
+                &amp;&amp; (((Path)i).wizDist == 0
+                || ((Path)i).wizDist &gt; this.wizDist + 1)
+                ) {
+<span class="fc" id="L156">                ((Path)i).wizDist = this.wizDist + 1;</span>
+                
+<span class="fc bfc" id="L158" title="All 2 branches covered.">                for(Direction j: ((Path)i).adj.keySet()) {</span>
+<span class="fc bfc" id="L159" title="All 2 branches covered.">                    if (((Path)i).adj.get(j) == this) {</span>
+<span class="fc" id="L160">                        ((Path)i).optimal = j;</span>
+                    }
+<span class="fc" id="L162">                }</span>
+<span class="fc" id="L163">                ((Path)i).determineWizDists();</span>
+            }
+<span class="fc" id="L165">        }</span>
+<span class="fc" id="L166">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Wizard.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">hw</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">Wizard.java</span></div><h1>Wizard.java</h1><pre class="source lang-java linenums">package WizardTD;
+
+import processing.core.PApplet;
+
+/**
+ * The Wizard class represents a wizard tower in the game.
+ * It inherits from WizOrPath, as a wizard tower can be considered a special kind of cell on the game map.
+ */
+public class Wizard extends WizOrPath {
+    // The path to the sprite image for the wizard tower.
+    private static final String spritePath = &quot;src/main/resources/WizardTD/wizard_house.png&quot;;
+
+    /**
+     * Constructor for the Wizard class.
+     * @param x The x-coordinate of the wizard tower on the map (in terms of cells, not pixels).
+     * @param y The y-coordinate of the wizard tower on the map (in terms of cells, not pixels).
+     * @param map A reference to the map object, allowing the wizard tower to interact with other game elements.
+     */
+    public Wizard(int x, int y, Map map) {
+        // Call to the superclass (WizOrPath) constructor.
+<span class="fc" id="L21">        super(x, y, map, Wizard.spritePath);</span>
+        
+        // Initialize the wizard's distance from the path to 0 (as it's not on a path).
+<span class="fc" id="L24">        this.wizDist = 0;</span>
+        
+        // Initialize the optimal direction to NONE, as the wizard doesn't need to move.
+<span class="fc" id="L27">        this.optimal = Direction.NONE;</span>
+<span class="fc" id="L28">    }</span>
+
+    /**
+     * The draw method is used to display the wizard tower on the screen.
+     * @param app A reference to the PApplet object, used to draw the wizard tower.
+     */
+    @Override
+    public void draw(PApplet app) {
+        // Draw the wizard tower's sprite on the screen.
+        // The position is adjusted to match the cell position on the map, with additional shifts for proper alignment.
+<span class="fc" id="L38">        app.image(</span>
+            this.sprite, 
+            this.x * CELLSIZE + App.WIZ_SHIFT_X, 
+            this.y * CELLSIZE + App.WIZ_SHIFT_Y + App.TOPBAR
+        );
+<span class="fc" id="L43">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

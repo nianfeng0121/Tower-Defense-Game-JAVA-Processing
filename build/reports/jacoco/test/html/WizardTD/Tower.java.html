@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Tower.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">hw</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">Tower.java</span></div><h1>Tower.java</h1><pre class="source lang-java linenums">package WizardTD;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Random;
+import processing.core.PApplet;
+
+// The Tower class represents a defense structure in the WizardTD game that can shoot projectiles at monsters.
+public class Tower extends Tile {
+
+    // Variables to keep track of the tower's attributes and levels.
+    private int rangeLevel; 
+    private int firingSpeedLevel;
+    private int damageLevel;
+    private int lowestLevel;
+    private double range;
+    private double firingSpeed;
+    private double damage;
+    private double initialTowerDamage;
+<span class="fc" id="L20">    private int framesCounter = 0;</span>
+    private int centerX;
+    private int centerY;
+
+    // List to store the projectiles (fireballs) shot by the tower.
+<span class="fc" id="L25">    private ArrayList&lt;Fireball&gt; projectiles = new ArrayList&lt;Fireball&gt;();</span>
+
+    // Default path to the tower's image.
+    private static final String spritePathToBeOveriden = &quot;src/main/resources/WizardTD/tower0.png&quot;;
+
+    // Constructor to initialize the tower with its attributes.
+    Tower(int x, int y, double initialRange, 
+          double initialFiringSpeed, double initialDamage, 
+          boolean initialRangeLevel, boolean initialFiringSpeedLevel,
+          boolean initialDamageLevel, Map map
+    ) {
+<span class="fc" id="L36">        super(x, y, map, Tower.spritePathToBeOveriden);</span>
+<span class="fc" id="L37">        this.centerX = x * App.CELLSIZE + App.CELLSIZE / 2;</span>
+<span class="fc" id="L38">        this.centerY = y * App.CELLSIZE + App.CELLSIZE / 2 + App.TOPBAR;</span>
+<span class="fc" id="L39">        this.range = initialRange;</span>
+<span class="fc" id="L40">        this.firingSpeed = initialFiringSpeed;</span>
+<span class="fc" id="L41">        this.damage = initialDamage;</span>
+<span class="fc" id="L42">        this.initialTowerDamage = initialDamage;</span>
+
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        if (initialRangeLevel) {</span>
+<span class="fc" id="L45">            this.upgradeRange();</span>
+        }
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if (initialFiringSpeedLevel) {</span>
+<span class="fc" id="L48">            this.upgradeFiringSpeed();</span>
+        }
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">        if (initialDamageLevel) {</span>
+<span class="fc" id="L51">            this.upgradeDamage();</span>
+        }
+<span class="fc" id="L53">    }</span>
+
+
+    // Methods to get the cost of upgrading different attributes.
+     
+    public double getRangeCost() {
+<span class="fc" id="L59">        return 20 + 10 * this.rangeLevel;</span>
+    }
+
+    public double getFiringSpeedCost() {
+<span class="fc" id="L63">        return 20 + 10 * this.firingSpeedLevel;</span>
+    }
+
+    public double getDamageCost() {
+<span class="fc" id="L67">        return 20 + 10 * this.damageLevel;</span>
+    }
+
+    // Getter methods for tower attributes and projectiles.
+    public double getRange() {
+<span class="fc" id="L72">        return this.range;</span>
+    }
+
+    public ArrayList&lt;Fireball&gt; getProjectiles() {
+<span class="fc" id="L76">        return this.projectiles;</span>
+    }
+
+    // Method to set the frames counter for testing.
+    public void setFramesCounter(int framesCounter) {
+<span class="nc" id="L81">        this.framesCounter = framesCounter;</span>
+<span class="nc" id="L82">    }</span>
+
+    public void findLowestLevel() {
+<span class="pc bpc" id="L85" title="3 of 4 branches missed.">        if (this.rangeLevel &lt;= this.firingSpeedLevel &amp;&amp; this.rangeLevel &lt;= this.damageLevel) {</span>
+<span class="nc" id="L86">            this.lowestLevel = this.rangeLevel;</span>
+<span class="pc bpc" id="L87" title="2 of 4 branches missed.">        } else if (this.firingSpeedLevel &lt;= this.rangeLevel &amp;&amp; this.firingSpeedLevel &lt;= this.damageLevel) {</span>
+<span class="fc" id="L88">            this.lowestLevel = this.firingSpeedLevel;</span>
+        } else {
+<span class="nc" id="L90">            this.lowestLevel = this.damageLevel;</span>
+        }
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">        if (this.lowestLevel &gt; 2) {</span>
+<span class="nc" id="L93">            this.lowestLevel = 2;</span>
+        }
+
+<span class="fc" id="L96">        this.sprite = this.map.getApp().loadImage(</span>
+                &quot;src/main/resources/WizardTD/tower&quot; + this.lowestLevel + &quot;.png&quot;);
+<span class="fc" id="L98">    }</span>
+
+    // Methods to upgrade the tower's attributes.
+    public void upgradeRange() {
+<span class="fc" id="L102">        this.rangeLevel++;</span>
+<span class="fc" id="L103">        this.range += 32;</span>
+<span class="fc" id="L104">    }</span>
+
+    public void upgradeFiringSpeed() {
+<span class="fc" id="L107">        this.firingSpeedLevel++;</span>
+<span class="fc" id="L108">        this.firingSpeed += 0.5;</span>
+<span class="fc" id="L109">    }</span>
+
+    public void upgradeDamage() {
+<span class="fc" id="L112">        this.damageLevel++;</span>
+<span class="fc" id="L113">        this.damage += this.initialTowerDamage / 2;</span>
+<span class="fc" id="L114">    }</span>
+
+    // Tower's method to shoot a projectile at monsters.
+    public void shoot() {
+<span class="nc" id="L118">        ArrayList&lt;Monster&gt; enemiesInRange = new ArrayList&lt;Monster&gt;();</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">        for (Wave wave : this.map.getWaves()) {</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">            for (Monster monster : wave.getMonsters()) {</span>
+<span class="nc" id="L121">                double spriteCentreX = monster.getPixelX() + App.SPRITE_SHIFT;</span>
+<span class="nc" id="L122">                double spriteCentreY = monster.getPixelY() + App.SPRITE_SHIFT;</span>
+
+<span class="nc bnc" id="L124" title="All 2 branches missed.">                if (App.scalarDistance(</span>
+                        this.centerX, this.centerY,
+                        spriteCentreX, spriteCentreY) &lt;= this.range) {
+<span class="nc" id="L127">                    enemiesInRange.add(monster);</span>
+                }
+<span class="nc" id="L129">            }</span>
+<span class="nc" id="L130">        }</span>
+
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        if (enemiesInRange.size() &gt; 0) {</span>
+<span class="nc" id="L133">            Random rand = new Random();</span>
+<span class="nc" id="L134">            int randIndex = rand.nextInt(enemiesInRange.size());</span>
+<span class="nc" id="L135">            Monster target = enemiesInRange.get(randIndex);</span>
+
+<span class="nc" id="L137">            projectiles.add(new Fireball(</span>
+<span class="nc" id="L138">                    this.centerX, this.centerY, target, this.damage, this.map.getApp()));</span>
+        }
+<span class="nc" id="L140">    }</span>
+
+    // Returns a string representation of the tower for debugging purposes.
+    @Override
+    public String toString() {
+<span class="nc" id="L145">        return this.rangeLevel + &quot; &quot; + this.firingSpeedLevel + &quot; &quot; +</span>
+                this.damageLevel + &quot; tower at (&quot; + this.x + &quot;, &quot; + this.y + &quot;)&quot;;
+    }
+
+    // Updates the tower's state every frame.
+    public void tick() {
+<span class="fc" id="L151">        double framesPerFireball = App.FPS / this.firingSpeed;</span>
+<span class="pc bpc" id="L152" title="1 of 2 branches missed.">        if (this.framesCounter &gt; framesPerFireball) {</span>
+<span class="nc" id="L153">            this.shoot();</span>
+<span class="nc" id="L154">            this.framesCounter = 0;</span>
+        }
+<span class="fc" id="L156">        this.framesCounter += this.map.getApp().rate;</span>
+
+<span class="fc" id="L158">        Iterator&lt;Fireball&gt; fireballIterator = this.projectiles.iterator();</span>
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">        while (fireballIterator.hasNext()) {</span>
+<span class="nc" id="L160">            Fireball fireball = fireballIterator.next();</span>
+<span class="nc" id="L161">            fireball.tick();</span>
+
+<span class="nc bnc" id="L163" title="All 2 branches missed.">            if (!(fireball.getExists())) {</span>
+<span class="nc" id="L164">                fireballIterator.remove();</span>
+            }
+<span class="nc" id="L166">        }</span>
+<span class="fc" id="L167">    }</span>
+
+    // Renders the tower and its upgrades on the screen.
+    @Override
+    public void draw(PApplet app) {
+<span class="fc" id="L172">        this.findLowestLevel();</span>
+<span class="fc" id="L173">        app.image(this.sprite, this.x * App.CELLSIZE, this.y * App.CELLSIZE + App.TOPBAR);</span>
+
+<span class="fc" id="L175">        int tileX = this.x * App.CELLSIZE;</span>
+<span class="fc" id="L176">        int tileY = this.y * App.CELLSIZE + App.TOPBAR;</span>
+<span class="fc" id="L177">        app.noFill();</span>
+
+<span class="pc bpc" id="L179" title="1 of 2 branches missed.">        if (this.firingSpeedLevel - this.lowestLevel &gt;= 1)</span>
+        {
+<span class="nc" id="L181">            app.stroke(120, 180, 255);</span>
+<span class="nc" id="L182">            app.strokeWeight((this.firingSpeedLevel - this.lowestLevel)* 2); </span>
+<span class="nc" id="L183">            app.rect(</span>
+                tileX + App.TOWER_SPEED_SQUARE_SHIFT, tileY + App.TOWER_SPEED_SQUARE_SHIFT,
+                App.TOWER_SPEED_SQUARE_LENGTH, App.TOWER_SPEED_SQUARE_LENGTH
+            );
+        }
+
+<span class="fc" id="L189">        app.stroke(255, 0, 255);</span>
+<span class="fc" id="L190">        app.strokeWeight(1);</span>
+        
+<span class="fc bfc" id="L192" title="All 2 branches covered.">        for(int i = 0; i &lt; this.rangeLevel - this.lowestLevel; i++) {</span>
+<span class="fc" id="L193">            app.ellipse( </span>
+                tileX + App.TOWER_FIRST_UPGRADE_SHIFT_X + 
+                i * (App.RANGE_UPGRADE_DIAMETER + App.TOWER_UPGRADE_CIRCLE_DIST),
+                tileY + App.TOWER_FIRST_UPGRADE_SHIFT_Y, 
+                App.RANGE_UPGRADE_DIAMETER, App.RANGE_UPGRADE_DIAMETER
+            );
+        }
+
+<span class="pc bpc" id="L201" title="1 of 2 branches missed.">        for(int i = 0; i &lt; this.damageLevel - this.lowestLevel; i++) {</span>
+<span class="nc" id="L202">            app.line(</span>
+                tileX + i * (App.TOWER_DAMAGE_CROSS_LENGTH_X + App.TOWER_UPGRADE_CROSS_DIST),
+                tileY + App.TOWER_FIRST_UPGRADE_DMG_SHIFT_Y,
+                tileX + App.TOWER_FIRST_UPGRADE_SHIFT_X +
+                (i+1) * App.TOWER_DAMAGE_CROSS_LENGTH_X + i * App.TOWER_UPGRADE_CROSS_DIST,
+                tileY + App.TOWER_FIRST_UPGRADE_DMG_SHIFT_Y + App.TOWER_DAMAGE_CROSS_LENGTH_Y
+            );
+<span class="nc" id="L209">            app.line(</span>
+                tileX + i * (App.TOWER_DAMAGE_CROSS_LENGTH_X + App.TOWER_UPGRADE_CROSS_DIST),
+                tileY + App.TOWER_FIRST_UPGRADE_DMG_SHIFT_Y + App.TOWER_DAMAGE_CROSS_LENGTH_Y,
+                tileX + App.TOWER_FIRST_UPGRADE_SHIFT_X +
+                (i+1) * App.TOWER_DAMAGE_CROSS_LENGTH_X + i * App.TOWER_UPGRADE_CROSS_DIST,
+                tileY + App.TOWER_FIRST_UPGRADE_DMG_SHIFT_Y
+            );
+        }
+<span class="fc" id="L217">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>
